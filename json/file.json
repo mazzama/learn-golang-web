@@ -1,0 +1,7 @@
+{
+  "FirstName":"Muhammad",
+  "LastName":"Azzam",
+  "Age":25,
+  "Married":false,
+  "Hobbies":["Gaming","Reading"]
+}
