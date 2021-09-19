@@ -18,11 +18,14 @@ func main() {
 		}
 	})
 	router.GET("/", func(writer http.ResponseWriter, request *http.Request, params httprouter.Params) {
-		fmt.Fprintf(writer, "Hello World!")
+		_, err := fmt.Fprintf(writer, "Hello World!")
+		if err != nil {
+			return
+		}
 	})
 
 	server := http.Server{
-		Addr: "localhost:3000",
+		Addr:    "localhost:3000",
 		Handler: router,
 	}
 
