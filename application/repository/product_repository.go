@@ -3,8 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"mazzama/learn-golang-web/application/domain"
 	"mazzama/learn-golang-web/application/helper"
+	"mazzama/learn-golang-web/application/model/domain"
 )
 
 type ProductRepository interface {
@@ -26,22 +26,50 @@ func (repository *ProductRepositoryImpl) Save(ctx context.Context, tx *sql.Tx, p
 	id, err := result.LastInsertId()
 	helper.PanicIfError(err)
 	product.Id = int(id)
-
 	return product
 }
 
 func (repository *ProductRepositoryImpl) Update(ctx context.Context, tx *sql.Tx, product domain.Product) domain.Product {
-	panic("implement me")
+	SQL := "update product set name = ? where id = ?"
+	_, err := tx.ExecContext(ctx, SQL, product.Name, product.Id)
+	helper.PanicIfError(err)
+	return product
 }
 
 func (repository *ProductRepositoryImpl) Delete(ctx context.Context, tx *sql.Tx, product domain.Product) {
-	panic("implement me")
+	SQL := "delete from product where id = ?"
+	_, err := tx.ExecContext(ctx, SQL, product.Id)
+	helper.PanicIfError(err)
 }
 
-func (repository *ProductRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, productId int) domain.Product {
-	panic("implement me")
+func (repository *ProductRepositoryImpl) FindById(ctx context.Context, tx *sql.Tx, productId int) (domain.Product, error) {
+	SQL := "select id, name from product where id = ?"
+	row, err := tx.QueryContext(ctx, SQL, productId)
+	helper.PanicIfError(err)
+	defer row.Close()
+
+	product := domain.Product{}
+	if row.Next() {
+		err := row.Scan(&product.Id, &product.Name)
+		helper.PanicIfError(err)
+		return product, nil
+	} else {
+		return product, err
+	}
 }
 
 func (repository *ProductRepositoryImpl) FindAll(ctx context.Context, tx *sql.Tx) []domain.Product {
-	panic("implement me")
+	SQL := "select id, name from product"
+	row, err := tx.QueryContext(ctx, SQL)
+	helper.PanicIfError(err)
+	defer row.Close()
+
+	var products []domain.Product
+	if row.Next() {
+		product := domain.Product{}
+		err := row.Scan(&product.Id, &product.Name)
+		helper.PanicIfError(err)
+		products = append(products, product)
+	}
+	return products
 }
